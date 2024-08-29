@@ -65,7 +65,7 @@ class HandRetarget:
             self.four_fingers_limits[1] - self.four_fingers_limits[0]) * 1000
         return four_angles
 
-    def _solve_thumb(self, finger_frames, pinch_distance):
+    def _solve_thumb(self, finger_frames):
         # 在大多数情况下都是直接映射两个自由度
         bending_angle = self._get_point_angle(
             finger_frames, 1, 4, 6)
@@ -91,11 +91,11 @@ class HandRetarget:
         # bending_angle 400 到 1000 之间
         # 这里的参数都要根据人手大小来调，即使调的好，解决pinch问题也比较有限，无法捏住很细小的东西
         # 主要原因是六自由度的限制
-        is_pinch_mode = pinch_distance < 0.04
-        if is_pinch_mode:
-            rotation_angle = 150
-            pinch_distance = np.clip(pinch_distance, 0.01, 0.04)
-            bending_angle = 800 * (pinch_distance - 0.01) / (0.04 - 0.01) + 400
+        # is_pinch_mode = pinch_distance < 0.04
+        # if is_pinch_mode:
+        #     rotation_angle = 150
+        #     pinch_distance = np.clip(pinch_distance, 0.01, 0.04)
+        #     bending_angle = 800 * (pinch_distance - 0.01) / (0.04 - 0.01) + 400
 
         return bending_angle, rotation_angle
 
@@ -115,40 +115,38 @@ class HandRetarget:
         # 这里的finger_frames是手指的坐标系，shape为(25, 4, 4)
         # pinch_distance是指尖的距离，标量
         finger_frames = r["left_fingers"]
-        pinch_distance = r["left_pinch_distance"]
+        # pinch_distance = r["left_pinch_distance"]
 
         # 如果数据是空的，代表visionpro没有检测到手部，给出的数据是无效的
         if finger_frames[1][0, 0] == 0 and finger_frames[1][0, 1] == 0 and finger_frames[1][0, 2] == 0:
             # 使用上一次的有效数据
             finger_frames = self.last_valid_left
-            pinch_distance = self.last_valid_left_pinch
+            # pinch_distance = self.last_valid_left_pinch
         else:
             # 保存当前数据
             self.last_valid_left = finger_frames
-            self.last_valid_left_pinch = pinch_distance
+            # self.last_valid_left_pinch = pinch_distance
 
         left_four_fingers_angles = self._solve_four_fingers(finger_frames)
-        left_thumb_angles = self._solve_thumb(
-            finger_frames, pinch_distance)
+        left_thumb_angles = self._solve_thumb( finger_frames)
         left_angles = np.concatenate(
             (left_four_fingers_angles, left_thumb_angles))
 
         # 右手
 
         finger_frames = r["right_fingers"]
-        pinch_distance = r["right_pinch_distance"]
+        # pinch_distance = r["right_pinch_distance"]
 
         if finger_frames[1][0, 0] == 0 and finger_frames[1][0, 1] == 0 and finger_frames[1][0, 2] == 0:
             # 说明是空的
             finger_frames = self.last_valid_right
-            pinch_distance = self.last_valid_right_pinch
+            # pinch_distance = self.last_valid_right_pinch
         else:
             self.last_valid_right = finger_frames
-            self.last_valid_right_pinch = pinch_distance
+            # self.last_valid_right_pinch = pinch_distance
 
         right_four_fingers_angles = self._solve_four_fingers(finger_frames)
-        right_thumb_angles = self._solve_thumb(
-            finger_frames, pinch_distance)
+        right_thumb_angles = self._solve_thumb( finger_frames)
         right_angles = np.concatenate(
             (right_four_fingers_angles, right_thumb_angles))
 
