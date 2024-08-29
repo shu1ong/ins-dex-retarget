@@ -36,8 +36,8 @@ class HandRetarget:
         # cache
         self.last_valid_left = None
         self.last_valid_right = None
-        self.last_valid_left_pinch = None
-        self.last_valid_right_pinch = None
+        # self.last_valid_left_pinch = None
+        # self.last_valid_right_pinch = None
 
     def _get_point_angle(self, finger_frames, origin, point1, point2):
         vector1 = finger_frames[point1, :3, 3] - \
@@ -105,10 +105,10 @@ class HandRetarget:
         # 初始判断需不需要保存cache
         if self.last_valid_left is None:
             self.last_valid_left = r["left_fingers"]
-            self.last_valid_left_pinch = r["left_pinch_distance"]
+            # self.last_valid_left_pinch = r["left_pinch_distance"]
         if self.last_valid_right is None:
             self.last_valid_right = r["right_fingers"]
-            self.last_valid_right_pinch = r["right_pinch_distance"]
+            # self.last_valid_right_pinch = r["right_pinch_distance"]
 
         # 左手
 
