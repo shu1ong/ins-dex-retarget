@@ -2,9 +2,11 @@ import rosbag
 import rospy
 from std_msgs.msg import String
 import numpy as np
+from hand_retarget import HandRetarget
+from communication import HandCommunication
 
 # 打开 rosbag 文件
-bag = rosbag.Bag('/home/shulong/Documents/GitHub/hand/Fold_towels_vdmsg.bag')
+bag = rosbag.Bag('Fold_towels_vdmsg.bag')
 
 
 def point_to_numpy(point):
@@ -60,20 +62,21 @@ def get_joint_positions(msg):
     ]
     
     rel_right_hand_position = right_hand_position - point_to_numpy(msg.position_body[18])
+    
+    relevent_position = (rel_left_hand_position,rel_right_hand_position)
+    return relevent_position
 
-    return rel_left_hand_position,rel_right_hand_position
 
-
-
+HR = HandRetarget
 
 
 # 遍历 bag 中的消息
 for topic, msg, t in bag.read_messages():
     # 打印消息信息
-    left_joint_position,right_joint_position =  get_joint_positions(msg)
+    r =  get_joint_positions(msg)
 
     
-    print(left_joint_position)
+    print(r[0])
     # print(relevent_positon)
 
     break
