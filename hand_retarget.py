@@ -39,11 +39,11 @@ class HandRetarget:
         # self.last_valid_left_pinch = None
         # self.last_valid_right_pinch = None
 
+    
     def _get_point_angle(self, finger_frames, origin, point1, point2):
-        vector1 = finger_frames[point1, :3, 3] - \
-            finger_frames[origin, :3, 3]
-        vector2 = finger_frames[point2, :3, 3] - \
-            finger_frames[origin, :3, 3]
+        #` 利用两个向量的夹角来计算
+        vector1 = finger_frames[point1, :3, 3] - finger_frames[origin, :3, 3]
+        vector2 = finger_frames[point2, :3, 3] - finger_frames[origin, :3, 3]
         angle = calculate_angle_between_vectors(
             vector1, vector2)/np.pi*180
         return angle
@@ -54,37 +54,31 @@ class HandRetarget:
         for i in range(4):
             # 6 to 9, 6 to 5 is index finger
             # plus 5 per finger
-            angle = self._get_point_angle(
-                finger_frames, 6+5*i, 5+5*i, 9+5*i)
+            angle = self._get_point_angle(finger_frames, 6+5*i, 5+5*i, 9+5*i)
             four_angles[3-i] = angle  # 倒着排
 
         # 这里两个值应该是人手打开和握拳的角度，映射到0到1000之间
         # 机械手的角度在19到176.7之间
         four_angles = np.clip(four_angles, *self.four_fingers_limits)
-        four_angles = (four_angles - self.four_fingers_limits[0]) / (
-            self.four_fingers_limits[1] - self.four_fingers_limits[0]) * 1000
+        four_angles = (four_angles - self.four_fingers_limits[0]) / ( self.four_fingers_limits[1] - self.four_fingers_limits[0]) * 1000
         return four_angles
 
     def _solve_thumb(self, finger_frames):
         # 在大多数情况下都是直接映射两个自由度
-        bending_angle = self._get_point_angle(
-            finger_frames, 1, 4, 6)
-        rotation_angle = self._get_point_angle(
-            finger_frames, 6, 3, 21)
+        bending_angle = self._get_point_angle( finger_frames, 1, 4, 6)
+        rotation_angle = self._get_point_angle( finger_frames, 6, 3, 21)
 
         # bending
         # 人手角度在xx和xx之间，映射到0到1000，
         # 机械手值 -13.0deg 到 53.6deg
         bending_angle = np.clip(bending_angle, *self.thumb_bending_limits)
-        bending_angle = (bending_angle - self.thumb_bending_limits[0]) / (
-            self.thumb_bending_limits[1] - self.thumb_bending_limits[0]) * 1000
+        bending_angle = (bending_angle - self.thumb_bending_limits[0]) / ( self.thumb_bending_limits[1] - self.thumb_bending_limits[0]) * 1000
 
         # rotation
         # 人手角度在xx和xx之间，映射到0到1000，
         # 机械手值 90deg 到 165deg
         rotation_angle = np.clip(rotation_angle, *self.thumb_rotation_limits)
-        rotation_angle = (rotation_angle - self.thumb_rotation_limits[0]) / (
-            self.thumb_rotation_limits[1] - self.thumb_rotation_limits[0]) * 1000
+        rotation_angle = (rotation_angle - self.thumb_rotation_limits[0]) / ( self.thumb_rotation_limits[1] - self.thumb_rotation_limits[0]) * 1000
 
         # 在pinch模式下例外
         # distance 0.01 到 0.04 之间，线性变换
