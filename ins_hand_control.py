@@ -6,7 +6,9 @@ from hand_retarget import HandRetarget
 from communication import HandCommunication
 
 # 打开 rosbag 文件
-bag = rosbag.Bag('twist_the_tupe.bag')
+# bag = rosbag.Bag('twist_the_tupe.bag')
+bag = rosbag.Bag('Fold_towels_vdmsg.bag')
+
 
 
 def point_to_numpy(point):

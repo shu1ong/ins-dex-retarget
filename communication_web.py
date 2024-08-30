@@ -1,25 +1,42 @@
-"""
-Author: shulong
-Date: 2024-08-30
-Version: 1.0.0
-mainly for the serial communication
-"""
+
 import json
 import serial
-import time
 
-def openSerial(port, baudrate):
-        ser = serial.Serial()
-        ser.port = port
-        ser.baudrate = baudrate
-        ser.open()
-        return ser
+
+class UDPServer:
+    def __init__(self, server_ip, server_port):
+        # 设置UDP服务器地址和端口
+        self.server = (server_ip, server_port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.settimeout(0.1)
+
+    def send(self, control_cmd):
+        self.socket.sendto(
+            bytes(json.dumps(control_cmd), "utf-8"), self.server)
+
+    def send_raw(self, control_cmd: bytes):
+        self.socket.sendto(
+            control_cmd, self.server)
+        # print('sent: ', control_cmd, 'to: ', self.server)
+
 
 class HandCommunication:
-    def __init__(self):
-        self.deviece = '/dev/ttyUSB0'
-        print('open port')
-        self.ser = openSerial(self.deviece, 115200)
+    def __init__(self, stupid=False):
+        if stupid:
+            self._left_hand_server_ip = '192.168.137.39'
+            self._right_hand_server_ip = '192.168.137.19'
+        else:
+            self._left_hand_server_ip = '192.168.137.19'
+            self._right_hand_server_ip = '192.168.137.39'
+        self._server_port = 2333
+        self.left_hand_udp_server = UDPServer(
+            self._left_hand_server_ip, self._server_port)
+        self.right_hand_udp_server = UDPServer(
+            self._right_hand_server_ip, self._server_port)
+        self.servers = {
+            'left': self.left_hand_udp_server,
+            'right': self.right_hand_udp_server
+        }
 
     def _angle_set(self, id, angles):
         send_data = bytearray()
@@ -103,7 +120,9 @@ class HandCommunication:
     def send_single_hand_cmd(self, hand_angles):
         id = 1
         cmd = self._angle_set(id, hand_angles)
-        self.ser.write(cmd)
-        time.sleep(0.01)
-        self.ser.flush()
+        self.left_hand_udp_server.send_raw(cmd)
+        try:
+            _, _ = self.left_hand_udp_server.socket.recvfrom(1024)
+        except:
+            pass
 

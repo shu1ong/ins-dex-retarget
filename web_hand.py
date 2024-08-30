@@ -52,7 +52,7 @@ def readRegister(ser, id, add, num, mute=False):
     bytes = [0xEB, 0x90]
     bytes.append(id) # id
     bytes.append(0x04) # len
-    bytes.append(0x11) # cmd
+    bytes.append(0x11) # 代表读取操作
     bytes.append(add & 0xFF)
     bytes.append((add >> 8) & 0xFF) # add
     bytes.append(num)
@@ -71,6 +71,9 @@ def readRegister(ser, id, add, num, mute=False):
     for i in range(num):
         val.append(recv[7 + i])
     if not mute:
+        print("发送的指令为:")
+        hex_string = ' '.join(f'{b:02X}' for b in bytes)
+        print(hex_string)
         print('读到的寄存器值依次为：', end='')
         for i in range(num):
             print(val[i], end=' ')
@@ -91,7 +94,7 @@ def write6(ser, id, str, val):
 
 def read6(ser, id, str):
     if str == 'angleSet' or str == 'forceSet' or str == 'speedSet' or str == 'angleAct' or str == 'forceAct':
-        val = readRegister(ser, id, regdict[str], 12, True)
+        val = readRegister(ser, id, regdict[str], 12, False)
         print(val)
         if len(val) < 12:
             print('没有读到数据')

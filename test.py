@@ -1,5 +1,5 @@
-from serial_com import InspireHandR
+from communication import HandCommunication
 
-hand = InspireHandR()
+HC = HandCommunication()
 
-hand.get_target_position()
+HC.send_single_hand_cmd([1000, 500, 500, 1000, 1000, 1000])
