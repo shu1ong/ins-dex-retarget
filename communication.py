@@ -115,3 +115,13 @@ class HandCommunication:
             _, _ = self.right_hand_udp_server.socket.recvfrom(1024)
         except:
             pass
+
+    def send_single_hand_cmd(self, hand_angles):
+        id = 1
+        cmd = self._angle_set(id, hand_angles)
+        self.left_hand_udp_server.send_raw(cmd)
+        try:
+            _, _ = self.left_hand_udp_server.socket.recvfrom(1024)
+        except:
+            pass
+
