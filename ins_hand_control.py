@@ -6,7 +6,7 @@ from hand_retarget import HandRetarget
 from communication import HandCommunication
 
 # 打开 rosbag 文件
-bag = rosbag.Bag('Fold_towels_vdmsg.bag')
+bag = rosbag.Bag('twist_the_tupe.bag')
 
 
 def point_to_numpy(point):
@@ -63,21 +63,21 @@ def get_joint_positions(msg):
     
     rel_right_hand_position = right_hand_position - point_to_numpy(msg.position_body[18])
     
-    relevent_position = (rel_left_hand_position,rel_right_hand_position)
+    relevent_position = (left_hand_position,right_hand_position)
     return relevent_position
 
 
-HR = HandRetarget
-
+HR = HandRetarget()
+HC = HandCommunication()
 
 # 遍历 bag 中的消息
 for topic, msg, t in bag.read_messages():
     # 打印消息信息
-    r =  get_joint_positions(msg)
-
+    relevent_position =  get_joint_positions(msg)
+    left_hand_angle,right_hand_angle = HR.solve_fingers_angles(relevent_position)
     
-    print(r[0])
-    # print(relevent_positon)
+    print(right_hand_angle)
+    
 
     break
     # 可以根据需要处理其他类型的消息

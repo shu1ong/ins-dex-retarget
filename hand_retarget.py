@@ -29,7 +29,7 @@ class HandRetarget:
         # 直接看手部关节数据，自由活动手部，看这些角度的上下限
         # 比如(40.0, 170.0)的意思是握拳的时候四根指头的角度是40，张开是170
         # 会被直接映射到因时机械手输入的0-1000之间
-        self.four_fingers_limits = (40.0, 170.0)
+        self.four_fingers_limits = (20, 170.0)
         self.thumb_bending_limits = (15.0, 30.0)
         self.thumb_rotation_limits = (80.0, 150.0)
 
@@ -62,11 +62,11 @@ class HandRetarget:
             # plus 5 per finger
             angle = self._get_point_angle(finger_frames, 4*i+4)
             four_angles[i] = angle  # 不用倒着排
-
         # 这里两个值应该是人手打开和握拳的角度，映射到0到1000之间
         # 机械手的角度在19到176.7之间
         four_angles = np.clip(four_angles, *self.four_fingers_limits)
         four_angles = (four_angles - self.four_fingers_limits[0]) / ( self.four_fingers_limits[1] - self.four_fingers_limits[0]) * 1000
+        print(four_angles)
         return four_angles
 
     def _solve_thumb(self, finger_frames):
@@ -101,7 +101,6 @@ class HandRetarget:
 
     def solve_fingers_angles(self, r):
         # 如果末端执行器是因时六自由度灵巧手，用这个函数
-
         # 初始判断需不需要保存cache
         if self.last_valid_left is None:
             self.last_valid_left = r[0] #`left
