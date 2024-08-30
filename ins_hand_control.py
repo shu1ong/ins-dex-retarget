@@ -4,10 +4,11 @@ from std_msgs.msg import String
 import numpy as np
 from hand_retarget import HandRetarget
 from communication import HandCommunication
+import time
 
 # 打开 rosbag 文件
 # bag = rosbag.Bag('twist_the_tupe.bag')
-bag = rosbag.Bag('Fold_towels_vdmsg.bag')
+bag = rosbag.Bag('take_items.bag')
 
 
 
@@ -78,11 +79,11 @@ for topic, msg, t in bag.read_messages():
     relevent_position =  get_joint_positions(msg)
     left_hand_angle,right_hand_angle = HR.solve_fingers_angles(relevent_position)
     
-    print(right_hand_angle)
-    
+    print(left_hand_angle)
+    HC.send_single_hand_cmd(left_hand_angle)
 
-    break
+    # break
     # 可以根据需要处理其他类型的消息
-
+    time.sleep(0.015)
 # 关闭 bag 文件
 bag.close()
